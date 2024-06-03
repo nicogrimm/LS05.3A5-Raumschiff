@@ -1,17 +1,17 @@
 plugins {
-    id("java")
-    id("application")
+    kotlin("jvm")
+    application
 }
 
 group = "com.github.nicogrimm"
 version = "1.0-SNAPSHOT"
 
-application {
-    mainClass = "com.github.nicogrimm.Sonnensystem"
+kotlin {
+    jvmToolchain(22)
 }
 
-val run by tasks.getting(JavaExec::class) {
-    standardInput = System.`in`;
+application {
+    mainClass = "com.github.nicogrimm.SonnensystemKt"
 }
 
 repositories {
@@ -21,10 +21,13 @@ repositories {
 dependencies {
     testImplementation(platform("org.junit:junit-bom:5.10.0"))
     testImplementation("org.junit.jupiter:junit-jupiter")
-    compileOnly("org.projectlombok:lombok:1.18.32")
-    annotationProcessor("org.projectlombok:lombok:1.18.32")
+    implementation(kotlin("stdlib-jdk8"))
 }
 
 tasks.test {
     useJUnitPlatform()
+}
+
+tasks.named<JavaExec>("run") {
+    standardInput = System.`in`
 }

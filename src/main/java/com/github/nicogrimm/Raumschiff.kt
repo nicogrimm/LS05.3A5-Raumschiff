@@ -1,6 +1,18 @@
 package com.github.nicogrimm
 
-class Raumschiff(val name: String, var posX: Int = 0, var posY: Int = 0) {
+class Raumschiff(val name: String, var posX: Int = 0, var posY: Int = 0, kapitaen: Kapitaen? = null) {
+    var kapitaen: Kapitaen? = null
+        set(value) {
+            kapitaen?.raumschiff = null
+
+            field = value
+            value?.raumschiff = this
+        }
+
+    init {
+        this.kapitaen = kapitaen
+    }
+
     fun fliegen(richtung: Richtung) {
         when (richtung) {
             Richtung.Oben -> this.posY -= 1

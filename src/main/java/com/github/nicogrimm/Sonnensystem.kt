@@ -13,7 +13,8 @@ fun main() {
     while (!gameOver) {
         println("Raumschiff Koordinaten: ${eos.koordinatenAlsString()}")
 
-        val richtung = richtungEingabe(scanner)
+        val richtung = richtungEingabe(scanner) ?: break
+
         eos.fliegen(richtung)
 
         if (eos.koordinaten == aurora.koordinaten) {
@@ -22,18 +23,23 @@ fun main() {
     }
 }
 
-fun richtungEingabe(scanner: Scanner): Richtung {
+fun richtungEingabe(scanner: Scanner): Richtung? {
     while (true) {
-        print("Bewegung (w/a/s/d): ")
-        val richtungChar = try {
+        print("Bewegung (w/a/s/d/q): ")
+        val char = try {
             scanner.nextLine()[0]
         } catch (e: StringIndexOutOfBoundsException) {
             ' '
         }
-        val richtung = Richtung.fromChar(richtungChar)
+
+        if (char == 'q') {
+            return null;
+        }
+
+        val richtung = Richtung.fromChar(char)
 
         if (richtung == null) {
-            println("FEHLER: Unbekannte Richtung: $richtungChar")
+            println("FEHLER: Unbekannte Richtung: $char")
             continue
         }
 

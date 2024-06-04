@@ -1,6 +1,6 @@
 package com.github.nicogrimm
 
-class Raumschiff(val name: String, var posX: Int = 0, var posY: Int = 0, kapitaen: Kapitaen? = null) {
+class Raumschiff(val name: String, var posX: Int = 0, var posY: Int = 0, kapitaen: Kapitaen? = null): LadungsBesitzer {
     var kapitaen: Kapitaen? = null
         set(value) {
             kapitaen?.raumschiff = null
@@ -24,4 +24,18 @@ class Raumschiff(val name: String, var posX: Int = 0, var posY: Int = 0, kapitae
 
     val koordinaten: Pair<Int, Int>
         get() = this.posX to this.posY
+
+    override val ladungen: MutableList<Ladung> = mutableListOf()
+
+    override fun addLadung(ladung: Ladung) {
+        ladung.besitzer?.removeLadung(ladung)
+
+        ladung.besitzer = this
+        ladungen.add(ladung)
+    }
+
+    override fun removeLadung(ladung: Ladung) {
+        ladung.besitzer = null
+        ladungen.remove(ladung)
+    }
 }

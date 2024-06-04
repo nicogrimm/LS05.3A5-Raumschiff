@@ -13,7 +13,5 @@ class Raumschiff(val name: String, var posX: Int = 0, var posY: Int = 0) {
     val koordinaten: List<Int>
         get() = listOf(this.posX, this.posY)
 
-    fun koordinatenAusgeben() {
-        System.out.printf("(%d, %d)", posX, posY)
-    }
+    fun koordinatenAlsString() = "($posX, $posY)"
 }

@@ -22,8 +22,6 @@ class Raumschiff(val name: String, var posX: Int = 0, var posY: Int = 0, kapitae
         }
     }
 
-    val koordinaten: List<Int>
-        get() = listOf(this.posX, this.posY)
-
-    fun koordinatenAlsString() = "($posX, $posY)"
+    val koordinaten: Pair<Int, Int>
+        get() = this.posX to this.posY
 }

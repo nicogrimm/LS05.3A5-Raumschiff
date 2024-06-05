@@ -28,5 +28,9 @@ class Kapitaen(var name: String, charisma: Int, erfahrung: Int) {
     }
 
     fun diplomatischeVerhandlungsWert() =
-        floor(erfahrung * 2 + charisma * (Random.nextInt(5, 15).toDouble() / 10)).toInt()
+        floor(erfahrung * 2 + charisma * Random.nextDouble(0.5, 1.5)).toInt()
+
+    override fun toString(): String {
+        return "Kapitän{name=\"$name\", charisma=$charisma, erfahrung=$erfahrung}"
+    }
 }

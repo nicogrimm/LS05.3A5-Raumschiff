@@ -33,48 +33,11 @@ fun main() {
     while (!gameOver) {
         koordinatenAnzeigen(eos)
 
-        val richtung = befehlEingabe(scanner, eos) ?: break
+        val eingabe = befehlEingabe(scanner)
 
-        eos.fliegen(richtung)
-
-        if (eos.koordinaten == aurora.koordinaten) {
-            println("Hier ist das Raumschiff ${aurora.name}")
-        }
-
-        for (planet in listOf(auroria, solaria, ktaris)) {
-            if (eos.koordinaten == planet.koordinaten) {
-                println("Hier ist der Planet ${planet.name}. Dieser Planet hat ${if (planet.atmosphaere) "eine" else "keine"} Atmosphaere.")
-                print("Möchtest du mit diesem Planeten Ladungen tauschen? (y/n) ")
-                val char = try {
-                    scanner.nextLine()[0]
-                } catch (e: StringIndexOutOfBoundsException) {
-                    ' '
-                }
-
-                if (char == 'y') {
-                    tauschen(scanner, eos, planet)
-                }
-            }
-        }
-    }
-}
-
-private fun koordinatenAnzeigen(eos: Raumschiff) {
-    println("Raumschiff Koordinaten: ${eos.koordinaten}")
-}
-
-fun befehlEingabe(scanner: Scanner, eos: Raumschiff): Richtung? {
-    while (true) {
-        print("Befehl (w/a/s/d/.../?): ")
-        val char = try {
-            scanner.nextLine()[0]
-        } catch (e: StringIndexOutOfBoundsException) {
-            ' '
-        }
-
-        when (char) {
-            'q' -> return null
-            'l' -> {
+        when (eingabe.second) {
+            Befehl.SpielBeenden -> break
+            Befehl.LadungenAuflisten -> {
                 if (eos.ladungen.isEmpty()) {
                     println("Du hast keine Ladungen")
                     continue
@@ -87,42 +50,94 @@ fun befehlEingabe(scanner: Scanner, eos: Raumschiff): Richtung? {
                 continue
             }
 
-            'k' -> {
+            Befehl.KoordinatenAnzeigen -> {
                 koordinatenAnzeigen(eos)
                 continue
             }
 
-            '?' -> {
+            Befehl.Hilfe -> {
                 println(
                     """
                     Spiel beenden mit 'q'
                     Bewegung mit 'w' (hoch), 'a' (links), 's' (unten) und 'd' (rechts)
                     Ladungen auflisten mit 'l'
                     Koordinaten anzeigen mit 'k'
+                    Stehen bleiben mit 'b'
                     Diese Hilfe anzeigen mit '?'
                 """.trimIndent()
                 )
                 continue
             }
+
+            Befehl.Bewegen -> {
+                val richtung = Richtung.fromChar(eingabe.first)
+                    ?: throw RuntimeException("Dieser Fehler sollte nie passieren (Unbekannte Richtung, die als Richtungsbefehl erkannt wurde)")
+                eos.fliegen(richtung)
+            }
+
+            Befehl.Stehenbleiben -> {}
         }
 
-        val richtung = Richtung.fromChar(char)
 
-        if (richtung == null) {
-            println("FEHLER: Unbekannter Befehl: '$char'")
-            continue
+        for (raumschiff in listOf(aurora)) {
+            if (eos.koordinaten == raumschiff.koordinaten) {
+                println("Hier ist das Raumschiff ${raumschiff.name} gesteuert von ${raumschiff.kapitaen?.name ?: "niemanden"}")
+                print("Möchtest du dieses Raumschiff angreifen? (y/n) ")
+                if (charLesen(scanner) == 'y') {
+                    eos.angreifen(raumschiff)
+
+                    if (raumschiff.integritaet == 0) {
+                        println("${raumschiff.name} wurde zerstört")
+                    }
+                }
+            }
         }
 
-        return richtung
+        for (planet in listOf(auroria, solaria, ktaris)) {
+            if (eos.koordinaten == planet.koordinaten) {
+                println("Hier ist der Planet ${planet.name}. Dieser Planet hat ${if (planet.atmosphaere) "eine" else "keine"} Atmosphaere.")
+                print("Möchtest du mit diesem Planeten Ladungen tauschen? (y/n) ")
+
+                if (charLesen(scanner) == 'y') {
+                    tauschen(scanner, eos, planet)
+                }
+            }
+        }
+    }
+}
+
+fun charLesen(scanner: Scanner): Char {
+    return try {
+        scanner.nextLine()[0]
+    } catch (e: StringIndexOutOfBoundsException) {
+        ' '
+    }
+}
+
+fun koordinatenAnzeigen(eos: Raumschiff) {
+    println("Raumschiff Koordinaten: ${eos.koordinaten}")
+}
+
+fun befehlEingabe(scanner: Scanner): Pair<Char, Befehl> {
+    while (true) {
+        print("Befehl (w/a/s/d/.../?): ")
+        val char = charLesen(scanner)
+        val befehl = Befehl.fromChar(char)
+
+        if (befehl != null) {
+            return char to befehl
+        }
+
+        println("FEHLER: Unbekannter Befehl: '$char'")
     }
 }
 
 fun tauschen(scanner: Scanner, raumschiff: Raumschiff, planet: Planet) {
-    var wiederholen = true;
+    var wiederholen = true
     while (wiederholen) {
         println()
 
-        val auswahl: Int;
+        val auswahl: Int
         if (raumschiff.ladungen.isEmpty() && planet.ladungen.isEmpty()) {
             println("Weder du noch der Planet hat Ladungen")
             return
@@ -138,22 +153,22 @@ fun tauschen(scanner: Scanner, raumschiff: Raumschiff, planet: Planet) {
 
         when (auswahl) {
             1 -> {
-                val ladung = ladungAuswaehlen("Welche Ladung möchstest du geben?", raumschiff.ladungen)
+                val ladung = ladungAuswaehlen("Welche Ladung möchtest du geben?", raumschiff.ladungen)
                 if (ladung != null) {
                     raumschiff.removeLadung(ladung)
                     planet.addLadung(ladung)
                 } else {
-                    wiederholen = false;
+                    wiederholen = false
                 }
             }
 
             2 -> {
-                val ladung = ladungAuswaehlen("Welche Ladung möchstest du erhalten?", planet.ladungen)
+                val ladung = ladungAuswaehlen("Welche Ladung möchtest du erhalten?", planet.ladungen)
                 if (ladung != null) {
                     planet.removeLadung(ladung)
                     raumschiff.addLadung(ladung)
                 } else {
-                    wiederholen = false;
+                    wiederholen = false
                 }
             }
 
@@ -162,13 +177,7 @@ fun tauschen(scanner: Scanner, raumschiff: Raumschiff, planet: Planet) {
 
         if (wiederholen) {
             print("Möchtest du noch mehr tauschen? (y/n) ")
-            val wiederholungChar = try {
-                scanner.nextLine()[0]
-            } catch (e: StringIndexOutOfBoundsException) {
-                ' '
-            }
-
-            wiederholen = wiederholungChar == 'y'
+            wiederholen = charLesen(scanner) == 'y'
         }
     }
 

@@ -31,7 +31,16 @@ fun main() {
     val scanner = Scanner(System.`in`)
     val gameOver = false
     while (!gameOver) {
-        koordinatenAnzeigen(eos)
+        val umgebung = umgebungAlsTextZeilen(eos, 5, 5, listOf(eos, aurora), listOf(auroria, solaria, ktaris));
+
+        for ((i, zeile) in umgebung.withIndex()) {
+            if (i == 1) {
+                print("$zeile ")
+                koordinatenAnzeigen(eos)
+            } else {
+                println(zeile)
+            }
+        }
 
         val eingabe = befehlEingabe(scanner)
 
@@ -64,6 +73,11 @@ fun main() {
                     Koordinaten anzeigen mit 'k'
                     Stehen bleiben mit 'b'
                     Diese Hilfe anzeigen mit '?'
+
+                    Symbole:
+                    x - (Dein) Raumschiff Eos
+                    > - Raumschiff
+                    O - Planet
                 """.trimIndent()
                 )
                 continue
@@ -116,6 +130,51 @@ fun charLesen(scanner: Scanner): Char {
 
 fun koordinatenAnzeigen(eos: Raumschiff) {
     println("Raumschiff Koordinaten: ${eos.koordinaten}")
+}
+
+fun umgebungAlsTextZeilen(
+    eos: Raumschiff,
+    sichtweiteX: Int,
+    sichtweiteY: Int,
+    raumschiffe: List<Raumschiff>,
+    planeten: List<Planet>
+): List<String> {
+    val zeilen = mutableListOf<String>()
+    zeilen.add("+" + "-".repeat(sichtweiteX * 2 + 1) + "+")
+
+    for (dy in -sichtweiteX..sichtweiteX) {
+        val y = eos.posY + dy;
+        var zeile = "|"
+
+        koordinatenLoop@ for (dx in -sichtweiteY..sichtweiteY) {
+            val x = eos.posX + dx;
+            val koordinaten = x to y
+
+            if (eos.koordinaten == koordinaten) {
+                zeile += "x"
+                continue
+            }
+            for (raumschiff in raumschiffe) {
+                if (raumschiff.koordinaten == koordinaten) {
+                    zeile += ">"
+                    continue@koordinatenLoop
+                }
+            }
+            for (planet in planeten) {
+                if (planet.koordinaten == koordinaten) {
+                    zeile += "O"
+                    continue@koordinatenLoop
+                }
+            }
+
+            zeile += " "
+        }
+        zeile += "|"
+        zeilen.add(zeile)
+    }
+
+    zeilen.add("+" + "-".repeat(sichtweiteX * 2 + 1) + "+")
+    return zeilen
 }
 
 fun befehlEingabe(scanner: Scanner): Pair<Char, Befehl> {

@@ -33,7 +33,7 @@ fun main() {
 
         when (eingabe.second) {
             Befehl.SpielBeenden -> break
-            Befehl.LadungenAuflisten -> {
+            Befehl.LadungenAnzeigen -> {
                 if (spielStand.eos.ladungen.isEmpty()) {
                     println("Du hast keine Ladungen")
                     continue
@@ -51,13 +51,21 @@ fun main() {
                 continue
             }
 
+            Befehl.RaumschiffStatusAnzeigen -> {
+                println("Status von ${spielStand.eos.name}:\n" +
+                        "    Integrität: ${spielStand.eos.integritaet}\n" +
+                        "    Energieschild: ${spielStand.eos.energieSchild}")
+                continue
+            }
+
             Befehl.Hilfe -> {
                 println(
                     """
                     Spiel beenden mit 'q'
                     Bewegung mit 'w' (hoch), 'a' (links), 's' (unten) und 'd' (rechts)
-                    Ladungen auflisten mit 'l'
+                    Ladungen anzeigen mit 'l'
                     Koordinaten anzeigen mit 'k'
+                    Status deines Raumschiffes anzeigen mit 'i'
                     Stehen bleiben mit 'b'
                     Diese Hilfe anzeigen mit '?'
 
@@ -261,10 +269,11 @@ fun tauschen(scanner: Scanner, raumschiff: Raumschiff, planet: Planet) {
             println("Der Planet hat keine Ladungen und du kannst nur welche geben.")
             auswahl = 1
         } else {
-            auswahl = ConsoleHelper.printMenu("Möchtest du Ladungen geben oder erhalten?", "Geben", "Erhalten")
+            auswahl = ConsoleHelper.printMenuOpt("Möchtest du Ladungen geben oder erhalten?", "Geben", "Erhalten")
         }
 
         when (auswahl) {
+            0 -> break
             1 -> {
                 val ladung = ladungAuswaehlen("Welche Ladung möchtest du geben?", raumschiff.ladungen)
                 if (ladung != null) {

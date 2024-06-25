@@ -101,19 +101,19 @@ class Raumschiff(
             restlicherSchaden -= energieSchildSchaden
             this.energieSchild -= energieSchildSchaden
 
-            println("${this.name}'s Energieschild hat $energieSchildSchaden Schaden genommen")
+            println("Das Energieschild von ${this.name} hat $energieSchildSchaden Schaden genommen")
 
             if (this.energieSchild == 0) {
-                println("${this.name}'s Energieschild wurde zerstört")
+                println("Das Energieschild von ${this.name} wurde zerstört")
             }
         }
         if (restlicherSchaden > 0) {
             val integritaetSchaden = min(this.integritaet, restlicherSchaden)
             this.integritaet -= integritaetSchaden
-            println("${this.name}'s Intigrität hat $integritaetSchaden Schaden genommen")
+            println("Die Integrität von ${this.name} hat $integritaetSchaden Schaden genommen")
 
             if (this.integritaet == 0) {
-                println("${this.name}'s Intigrität wurde zerstört")
+                println("Die Integrität von ${this.name} wurde zerstört")
             }
         }
     }

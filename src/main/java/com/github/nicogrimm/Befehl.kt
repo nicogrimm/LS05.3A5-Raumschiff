@@ -1,7 +1,7 @@
 package com.github.nicogrimm
 
 enum class Befehl {
-    Bewegen, Stehenbleiben, LadungenAuflisten, KoordinatenAnzeigen, Hilfe, SpielBeenden;
+    Bewegen, Stehenbleiben, LadungenAnzeigen, KoordinatenAnzeigen, RaumschiffStatusAnzeigen, Hilfe, SpielBeenden;
 
     companion object {
         fun fromChar(c: Char): Befehl? {
@@ -9,8 +9,9 @@ enum class Befehl {
                 'q' -> SpielBeenden
                 'w', 'd', 's', 'a' -> Bewegen
                 'b' -> Stehenbleiben
-                'l' -> LadungenAuflisten
+                'l' -> LadungenAnzeigen
                 'k' -> KoordinatenAnzeigen
+                'i' -> RaumschiffStatusAnzeigen
                 '?' -> Hilfe
                 else -> null
             }

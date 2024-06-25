@@ -101,7 +101,9 @@ fun main() {
         }
 
 
-        for (raumschiff in raumschiffe) {
+        val it = raumschiffe.listIterator()
+        while (it.hasNext()) {
+            val raumschiff = it.next()
             if (raumschiff != eos && eos.koordinaten == raumschiff.koordinaten) {
                 println("Hier ist das Raumschiff ${raumschiff.name} gesteuert von ${raumschiff.kapitaen?.name ?: "niemanden"}")
                 print("Möchtest du dieses Raumschiff angreifen? (y/n) ")
@@ -110,6 +112,7 @@ fun main() {
 
                     if (raumschiff.integritaet == 0) {
                         println("${raumschiff.name} wurde zerstört")
+                        it.remove()
                     }
                 }
             }
@@ -141,11 +144,7 @@ fun koordinatenAnzeigen(eos: Raumschiff) {
 }
 
 fun umgebungAlsTextZeilen(
-    eos: Raumschiff,
-    sichtweiteX: Int,
-    sichtweiteY: Int,
-    raumschiffe: List<Raumschiff>,
-    planeten: List<Planet>
+    eos: Raumschiff, sichtweiteX: Int, sichtweiteY: Int, raumschiffe: List<Raumschiff>, planeten: List<Planet>
 ): List<String> {
     val zeilen = mutableListOf<String>()
     zeilen.add("+" + "-".repeat(sichtweiteX * 2 + 1) + "+")

@@ -9,12 +9,20 @@ fun main() {
 
     alexia.name = "Alexia Starlight Nova"
 
+    val raumschiffe = mutableListOf<Raumschiff>();
+    val planeten = mutableListOf<Planet>()
+
     val eos = Raumschiff("Eos Nova", 0, 2, kapitaen = alexia)
+    raumschiffe.add(eos);
     val aurora = Raumschiff("Aurora Quest", 1, 3, kapitaen = zenith)
+    raumschiffe.add(aurora);
 
     val auroria = Planet("Auroria", true, 0, 2)
+    planeten.add(auroria)
     val solaria = Planet("Solara", true, 4, 6)
+    planeten.add(solaria)
     val ktaris = Planet("Ktaris", false, 10, 3)
+    planeten.add(ktaris)
 
     val gemuese = Ladung("Gemuese", 10)
     val nanobots = Ladung("Nanobots", 15)
@@ -31,7 +39,7 @@ fun main() {
     val scanner = Scanner(System.`in`)
     val gameOver = false
     while (!gameOver) {
-        val umgebung = umgebungAlsTextZeilen(eos, 5, 5, listOf(eos, aurora), listOf(auroria, solaria, ktaris));
+        val umgebung = umgebungAlsTextZeilen(eos, 5, 5, raumschiffe, planeten)
 
         for ((i, zeile) in umgebung.withIndex()) {
             if (i == 1) {
@@ -93,8 +101,8 @@ fun main() {
         }
 
 
-        for (raumschiff in listOf(aurora)) {
-            if (eos.koordinaten == raumschiff.koordinaten) {
+        for (raumschiff in raumschiffe) {
+            if (raumschiff != eos && eos.koordinaten == raumschiff.koordinaten) {
                 println("Hier ist das Raumschiff ${raumschiff.name} gesteuert von ${raumschiff.kapitaen?.name ?: "niemanden"}")
                 print("Möchtest du dieses Raumschiff angreifen? (y/n) ")
                 if (charLesen(scanner) == 'y') {
@@ -107,7 +115,7 @@ fun main() {
             }
         }
 
-        for (planet in listOf(auroria, solaria, ktaris)) {
+        for (planet in planeten) {
             if (eos.koordinaten == planet.koordinaten) {
                 println("Hier ist der Planet ${planet.name}. Dieser Planet hat ${if (planet.atmosphaere) "eine" else "keine"} Atmosphaere.")
                 print("Möchtest du mit diesem Planeten Ladungen tauschen? (y/n) ")
@@ -143,11 +151,11 @@ fun umgebungAlsTextZeilen(
     zeilen.add("+" + "-".repeat(sichtweiteX * 2 + 1) + "+")
 
     for (dy in -sichtweiteX..sichtweiteX) {
-        val y = eos.posY + dy;
+        val y = eos.posY + dy
         var zeile = "|"
 
         koordinatenLoop@ for (dx in -sichtweiteY..sichtweiteY) {
-            val x = eos.posX + dx;
+            val x = eos.posX + dx
             val koordinaten = x to y
 
             if (eos.koordinaten == koordinaten) {

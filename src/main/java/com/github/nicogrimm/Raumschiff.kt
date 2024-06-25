@@ -1,6 +1,5 @@
 package com.github.nicogrimm
 
-import kotlin.math.max
 import kotlin.math.min
 import kotlin.random.Random
 
@@ -78,10 +77,10 @@ class Raumschiff(
     }
 
     // Ein Raumschiff erreicht 100% Ausweichchance bei 150 manoevrierFaehigkeit
-    private fun ausweichChange() = (0.012 * manoevrierFaehigkeit) / (0.01 * manoevrierFaehigkeit + 0.3)
+    private fun ausweichChance() = (0.022 * manoevrierFaehigkeit) / (0.01 * manoevrierFaehigkeit + 1.8)
 
     fun angreifen(gegner: Raumschiff) {
-        if (gegner.integritaet > 0 && Random.Default.nextDouble(0.1, 1.0) <= gegner.ausweichChange()) {
+        if (gegner.integritaet > 0 && Random.Default.nextDouble(0.1, 1.0) <= gegner.ausweichChance()) {
             println("Angriff hat nicht getroffen")
             return
         }

@@ -61,6 +61,7 @@ fun main() {
             Befehl.Hilfe -> {
                 println(
                     """
+                    Befehle:
                     Spiel beenden mit 'q'
                     Bewegung mit 'w' (hoch), 'a' (links), 's' (unten) und 'd' (rechts)
                     Ladungen anzeigen mit 'l'

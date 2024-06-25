@@ -3,7 +3,136 @@ package com.github.nicogrimm
 import com.github.nicogrimm.util.ConsoleHelper
 import java.util.*
 
+class SpielStand(
+    val eos: Raumschiff,
+    val raumschiffe: MutableList<Raumschiff>,
+    val planeten: MutableList<Planet>,
+    val asteroidenFelder: MutableList<AsteroidenFeld>
+)
+
 fun main() {
+    val spielStand = init()
+
+    println("Sie fliegen das Raumschiff ${spielStand.eos.name} gesteuert von ${spielStand.eos.kapitaen?.name ?: "niemanden"}")
+
+    val scanner = Scanner(System.`in`)
+    var gameOver = false
+    while (!gameOver) {
+        val umgebung = umgebungAlsTextZeilen(spielStand, 5, 5)
+
+        for ((i, zeile) in umgebung.withIndex()) {
+            if (i == 1) {
+                print("$zeile ")
+                koordinatenAnzeigen(spielStand.eos)
+            } else {
+                println(zeile)
+            }
+        }
+
+        val eingabe = befehlEingabe(scanner)
+
+        when (eingabe.second) {
+            Befehl.SpielBeenden -> break
+            Befehl.LadungenAuflisten -> {
+                if (spielStand.eos.ladungen.isEmpty()) {
+                    println("Du hast keine Ladungen")
+                    continue
+                }
+
+                println("Deine Ladungen: ")
+                for (ladung in spielStand.eos.ladungen) {
+                    println("    $ladung")
+                }
+                continue
+            }
+
+            Befehl.KoordinatenAnzeigen -> {
+                koordinatenAnzeigen(spielStand.eos)
+                continue
+            }
+
+            Befehl.Hilfe -> {
+                println(
+                    """
+                    Spiel beenden mit 'q'
+                    Bewegung mit 'w' (hoch), 'a' (links), 's' (unten) und 'd' (rechts)
+                    Ladungen auflisten mit 'l'
+                    Koordinaten anzeigen mit 'k'
+                    Stehen bleiben mit 'b'
+                    Diese Hilfe anzeigen mit '?'
+
+                    Symbole:
+                    x - (Dein) Raumschiff Eos
+                    > - Raumschiff
+                    O - Planet
+                    # - Asteroiden Feld
+                """.trimIndent()
+                )
+                continue
+            }
+
+            Befehl.Bewegen -> {
+                val richtung = Richtung.fromChar(eingabe.first)
+                    ?: throw RuntimeException("Dieser Fehler sollte nie passieren (Unbekannte Richtung, die als Richtungsbefehl erkannt wurde)")
+                spielStand.eos.fliegen(richtung)
+            }
+
+            Befehl.Stehenbleiben -> {}
+        }
+
+
+        val it = spielStand.raumschiffe.listIterator()
+        while (it.hasNext()) {
+            val raumschiff = it.next()
+            if (raumschiff != spielStand.eos && spielStand.eos.koordinaten == raumschiff.koordinaten) {
+                println("Hier ist das Raumschiff ${raumschiff.name} gesteuert von ${raumschiff.kapitaen?.name ?: "niemanden"}")
+                print("Möchtest du dieses Raumschiff angreifen? (y/n) ")
+                if (charLesen(scanner) == 'y') {
+                    spielStand.eos.angreifen(raumschiff)
+
+                    if (raumschiff.integritaet == 0) {
+                        println("${raumschiff.name} wurde zerstört")
+                        it.remove()
+                    }
+                }
+            }
+        }
+
+        for (planet in spielStand.planeten) {
+            if (spielStand.eos.koordinaten == planet.koordinaten) {
+                println("Hier ist der Planet ${planet.name}. Dieser Planet hat ${if (planet.atmosphaere) "eine" else "keine"} Atmosphaere.")
+                print("Möchtest du mit diesem Planeten Ladungen tauschen? (y/n) ")
+
+                if (charLesen(scanner) == 'y') {
+                    tauschen(scanner, spielStand.eos, planet)
+                }
+            }
+        }
+
+        for (feld in spielStand.asteroidenFelder) {
+            if (spielStand.eos.koordinaten == feld.koordinaten) {
+                println("Hier ist ein Asteroidenfeld.")
+
+                val schaden = feld.raumschiffKollison(spielStand.eos)
+                if (schaden > 0) {
+                    println("Du konntest das Asteroidenfeld nicht so gut navigieren")
+                    spielStand.eos.schadenNehmen(schaden)
+                } else {
+                    println("Du konntest das Asteroidenfeld problemlos navigieren.")
+                }
+            }
+        }
+
+        if (spielStand.eos.integritaet == 0) {
+            gameOver = true
+
+            println("Dein Raumschiff ${spielStand.eos.name} wurde zerstört.")
+            println("===== GAME OVER =====")
+        }
+    }
+}
+
+fun init(): SpielStand {
     val alexia = Kapitaen("Alexia Nova", 8, 6)
     val zenith = Kapitaen("Zenith Nightfall", 7, 8)
 
@@ -34,128 +163,11 @@ fun main() {
     solaria.addLadung(antimaterieWaffen)
     auroria.addLadung(medizin)
 
-    val asteroidenFelder = listOf(
-        AsteroidenFeld(0, 5, 70),
-        AsteroidenFeld(4, 3, 40)
+    val asteroidenFelder = mutableListOf(
+        AsteroidenFeld(0, 5, 70), AsteroidenFeld(4, 3, 40)
     )
 
-    println("Sie fliegen das Raumschiff ${eos.name} gesteuert von ${eos.kapitaen?.name ?: "niemanden"}")
-
-    val scanner = Scanner(System.`in`)
-    var gameOver = false
-    while (!gameOver) {
-        val umgebung = umgebungAlsTextZeilen(eos, 5, 5, raumschiffe, planeten, asteroidenFelder)
-
-        for ((i, zeile) in umgebung.withIndex()) {
-            if (i == 1) {
-                print("$zeile ")
-                koordinatenAnzeigen(eos)
-            } else {
-                println(zeile)
-            }
-        }
-
-        val eingabe = befehlEingabe(scanner)
-
-        when (eingabe.second) {
-            Befehl.SpielBeenden -> break
-            Befehl.LadungenAuflisten -> {
-                if (eos.ladungen.isEmpty()) {
-                    println("Du hast keine Ladungen")
-                    continue
-                }
-
-                println("Deine Ladungen: ")
-                for (ladung in eos.ladungen) {
-                    println("    $ladung")
-                }
-                continue
-            }
-
-            Befehl.KoordinatenAnzeigen -> {
-                koordinatenAnzeigen(eos)
-                continue
-            }
-
-            Befehl.Hilfe -> {
-                println(
-                    """
-                    Spiel beenden mit 'q'
-                    Bewegung mit 'w' (hoch), 'a' (links), 's' (unten) und 'd' (rechts)
-                    Ladungen auflisten mit 'l'
-                    Koordinaten anzeigen mit 'k'
-                    Stehen bleiben mit 'b'
-                    Diese Hilfe anzeigen mit '?'
-
-                    Symbole:
-                    x - (Dein) Raumschiff Eos
-                    > - Raumschiff
-                    O - Planet
-                    # - Asteroiden Feld
-                """.trimIndent()
-                )
-                continue
-            }
-
-            Befehl.Bewegen -> {
-                val richtung = Richtung.fromChar(eingabe.first)
-                    ?: throw RuntimeException("Dieser Fehler sollte nie passieren (Unbekannte Richtung, die als Richtungsbefehl erkannt wurde)")
-                eos.fliegen(richtung)
-            }
-
-            Befehl.Stehenbleiben -> {}
-        }
-
-
-        val it = raumschiffe.listIterator()
-        while (it.hasNext()) {
-            val raumschiff = it.next()
-            if (raumschiff != eos && eos.koordinaten == raumschiff.koordinaten) {
-                println("Hier ist das Raumschiff ${raumschiff.name} gesteuert von ${raumschiff.kapitaen?.name ?: "niemanden"}")
-                print("Möchtest du dieses Raumschiff angreifen? (y/n) ")
-                if (charLesen(scanner) == 'y') {
-                    eos.angreifen(raumschiff)
-
-                    if (raumschiff.integritaet == 0) {
-                        println("${raumschiff.name} wurde zerstört")
-                        it.remove()
-                    }
-                }
-            }
-        }
-
-        for (planet in planeten) {
-            if (eos.koordinaten == planet.koordinaten) {
-                println("Hier ist der Planet ${planet.name}. Dieser Planet hat ${if (planet.atmosphaere) "eine" else "keine"} Atmosphaere.")
-                print("Möchtest du mit diesem Planeten Ladungen tauschen? (y/n) ")
-
-                if (charLesen(scanner) == 'y') {
-                    tauschen(scanner, eos, planet)
-                }
-            }
-        }
-
-        for (feld in asteroidenFelder) {
-            if (eos.koordinaten == feld.koordinaten) {
-                println("Hier ist ein Asteroidenfeld.")
-
-                val schaden = feld.raumschiffKollison(eos)
-                if (schaden > 0) {
-                    println("Du konntest das Asteroidenfeld nicht so gut navigieren")
-                    eos.schadenNehmen(schaden)
-                } else {
-                    println("Du konntest das Asteroidenfeld problemlos navigieren.")
-                }
-            }
-        }
-
-        if (eos.integritaet == 0) {
-            gameOver = true
-
-            println("Dein Raumschiff ${eos.name} wurde zerstört.")
-            println("===== GAME OVER =====")
-        }
-    }
+    return SpielStand(eos, raumschiffe, planeten, asteroidenFelder)
 }
 
 fun charLesen(scanner: Scanner): Char {
@@ -171,36 +183,38 @@ fun koordinatenAnzeigen(eos: Raumschiff) {
 }
 
 fun umgebungAlsTextZeilen(
-    eos: Raumschiff, sichtweiteX: Int, sichtweiteY: Int, raumschiffe: List<Raumschiff>, planeten: List<Planet>, asteroidenFelder: List<AsteroidenFeld>
+    spielStand: SpielStand,
+    sichtweiteX: Int,
+    sichtweiteY: Int,
 ): List<String> {
     val zeilen = mutableListOf<String>()
     zeilen.add("+" + "-".repeat(sichtweiteX * 2 + 1) + "+")
 
     for (dy in -sichtweiteX..sichtweiteX) {
-        val y = eos.posY + dy
+        val y = spielStand.eos.posY + dy
         var zeile = "|"
 
         koordinatenLoop@ for (dx in -sichtweiteY..sichtweiteY) {
-            val x = eos.posX + dx
+            val x = spielStand.eos.posX + dx
             val koordinaten = x to y
 
-            if (eos.koordinaten == koordinaten) {
+            if (spielStand.eos.koordinaten == koordinaten) {
                 zeile += "x"
                 continue
             }
-            for (raumschiff in raumschiffe) {
+            for (raumschiff in spielStand.raumschiffe) {
                 if (raumschiff.koordinaten == koordinaten) {
                     zeile += ">"
                     continue@koordinatenLoop
                 }
             }
-            for (planet in planeten) {
+            for (planet in spielStand.planeten) {
                 if (planet.koordinaten == koordinaten) {
                     zeile += "O"
                     continue@koordinatenLoop
                 }
             }
-            for (feld in asteroidenFelder) {
+            for (feld in spielStand.asteroidenFelder) {
                 if (feld.koordinaten == koordinaten) {
                     zeile += "#"
                     continue@koordinatenLoop

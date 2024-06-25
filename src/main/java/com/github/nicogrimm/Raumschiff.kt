@@ -76,8 +76,9 @@ class Raumschiff(
         ladungen.remove(ladung)
     }
 
-    // Ein Raumschiff erreicht 100% Ausweichchance bei 150 manoevrierFaehigkeit
-    private fun ausweichChance() = (0.022 * manoevrierFaehigkeit) / (0.01 * manoevrierFaehigkeit + 1.8)
+    // Ein Raumschiff erreicht 100% Ausweichchance bei etwa 150 manoevrierFaehigkeit
+    fun ausweichChance() = (0.022 * manoevrierFaehigkeit) / (0.01 * manoevrierFaehigkeit + 1.8)
+    fun asteroidenAusweichChance() = (0.012 * manoevrierFaehigkeit) / (0.01 * manoevrierFaehigkeit + 0.5) + 0.1
 
     fun angreifen(gegner: Raumschiff) {
         if (gegner.integritaet > 0 && Random.Default.nextDouble(0.1, 1.0) <= gegner.ausweichChance()) {
@@ -90,25 +91,29 @@ class Raumschiff(
         val schadenModifikator =
             (((kapitaen?.erfahrung ?: 3) - 1) / 9 * 0.4 + 0.8) * Random.Default.nextDouble(0.9, 1.2)
 
-        var restlicherSchaden = (waffenstaerke * schadenModifikator).toInt()
-        if (gegner.energieSchild > 0) {
-            val energieSchildSchaden = min(restlicherSchaden, gegner.energieSchild)
+        gegner.schadenNehmen((waffenstaerke * schadenModifikator).toInt())
+    }
+
+    fun schadenNehmen(schaden: Int) {
+        var restlicherSchaden = schaden
+        if (this.energieSchild > 0) {
+            val energieSchildSchaden = min(restlicherSchaden, this.energieSchild)
             restlicherSchaden -= energieSchildSchaden
-            gegner.energieSchild -= energieSchildSchaden
+            this.energieSchild -= energieSchildSchaden
 
-            println("Gegner's Energieschild hat $energieSchildSchaden Schaden genommen")
+            println("${this.name}'s Energieschild hat $energieSchildSchaden Schaden genommen")
 
-            if (gegner.energieSchild == 0) {
-                println("Gegner's Energieschild wurde zerstört")
+            if (this.energieSchild == 0) {
+                println("${this.name}'s Energieschild wurde zerstört")
             }
         }
         if (restlicherSchaden > 0) {
-            val schaden = min(gegner.integritaet, restlicherSchaden)
-            gegner.integritaet -= schaden
-            println("Gegner's Intigrität hat $schaden Schaden genommen")
+            val integritaetSchaden = min(this.integritaet, restlicherSchaden)
+            this.integritaet -= integritaetSchaden
+            println("${this.name}'s Intigrität hat $integritaetSchaden Schaden genommen")
 
-            if (gegner.integritaet == 0) {
-                println("Gegner's Intigrität wurde zerstört")
+            if (this.integritaet == 0) {
+                println("${this.name}'s Intigrität wurde zerstört")
             }
         }
     }

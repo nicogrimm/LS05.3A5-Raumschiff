@@ -9,13 +9,13 @@ fun main() {
 
     alexia.name = "Alexia Starlight Nova"
 
-    val raumschiffe = mutableListOf<Raumschiff>();
+    val raumschiffe = mutableListOf<Raumschiff>()
     val planeten = mutableListOf<Planet>()
 
     val eos = Raumschiff("Eos Nova", 0, 2, kapitaen = alexia)
-    raumschiffe.add(eos);
+    raumschiffe.add(eos)
     val aurora = Raumschiff("Aurora Quest", 1, 3, kapitaen = zenith)
-    raumschiffe.add(aurora);
+    raumschiffe.add(aurora)
 
     val auroria = Planet("Auroria", true, 0, 2)
     planeten.add(auroria)
@@ -34,12 +34,17 @@ fun main() {
     solaria.addLadung(antimaterieWaffen)
     auroria.addLadung(medizin)
 
+    val asteroidenFelder = listOf(
+        AsteroidenFeld(0, 5, 70),
+        AsteroidenFeld(4, 3, 40)
+    )
+
     println("Sie fliegen das Raumschiff ${eos.name} gesteuert von ${eos.kapitaen?.name ?: "niemanden"}")
 
     val scanner = Scanner(System.`in`)
-    val gameOver = false
+    var gameOver = false
     while (!gameOver) {
-        val umgebung = umgebungAlsTextZeilen(eos, 5, 5, raumschiffe, planeten)
+        val umgebung = umgebungAlsTextZeilen(eos, 5, 5, raumschiffe, planeten, asteroidenFelder)
 
         for ((i, zeile) in umgebung.withIndex()) {
             if (i == 1) {
@@ -86,6 +91,7 @@ fun main() {
                     x - (Dein) Raumschiff Eos
                     > - Raumschiff
                     O - Planet
+                    # - Asteroiden Feld
                 """.trimIndent()
                 )
                 continue
@@ -128,6 +134,27 @@ fun main() {
                 }
             }
         }
+
+        for (feld in asteroidenFelder) {
+            if (eos.koordinaten == feld.koordinaten) {
+                println("Hier ist ein Asteroidenfeld.")
+
+                val schaden = feld.raumschiffKollison(eos)
+                if (schaden > 0) {
+                    println("Du konntest das Asteroidenfeld nicht so gut navigieren")
+                    eos.schadenNehmen(schaden)
+                } else {
+                    println("Du konntest das Asteroidenfeld problemlos navigieren.")
+                }
+            }
+        }
+
+        if (eos.integritaet == 0) {
+            gameOver = true
+
+            println("Dein Raumschiff ${eos.name} wurde zerstört.")
+            println("===== GAME OVER =====")
+        }
     }
 }
 
@@ -144,7 +171,7 @@ fun koordinatenAnzeigen(eos: Raumschiff) {
 }
 
 fun umgebungAlsTextZeilen(
-    eos: Raumschiff, sichtweiteX: Int, sichtweiteY: Int, raumschiffe: List<Raumschiff>, planeten: List<Planet>
+    eos: Raumschiff, sichtweiteX: Int, sichtweiteY: Int, raumschiffe: List<Raumschiff>, planeten: List<Planet>, asteroidenFelder: List<AsteroidenFeld>
 ): List<String> {
     val zeilen = mutableListOf<String>()
     zeilen.add("+" + "-".repeat(sichtweiteX * 2 + 1) + "+")
@@ -170,6 +197,12 @@ fun umgebungAlsTextZeilen(
             for (planet in planeten) {
                 if (planet.koordinaten == koordinaten) {
                     zeile += "O"
+                    continue@koordinatenLoop
+                }
+            }
+            for (feld in asteroidenFelder) {
+                if (feld.koordinaten == koordinaten) {
+                    zeile += "#"
                     continue@koordinatenLoop
                 }
             }

@@ -31,6 +31,6 @@ class Kapitaen(var name: String, charisma: Int, erfahrung: Int) {
         floor(erfahrung * 2 + charisma * Random.nextDouble(0.5, 1.5)).toInt()
 
     override fun toString(): String {
-        return "Kapitän{name=\"$name\", charisma=$charisma, erfahrung=$erfahrung}"
+        return "Kapitaen{name=\"$name\", charisma=$charisma, erfahrung=$erfahrung}"
     }
 }

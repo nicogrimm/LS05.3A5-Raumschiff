@@ -53,7 +53,7 @@ fun main() {
 
             Befehl.RaumschiffStatusAnzeigen -> {
                 println("Status von ${spielStand.eos.name}:\n" +
-                        "    Integrität: ${spielStand.eos.integritaet}\n" +
+                        "    Integritaet: ${spielStand.eos.integritaet}\n" +
                         "    Energieschild: ${spielStand.eos.energieSchild}")
                 continue
             }
@@ -95,12 +95,12 @@ fun main() {
             val raumschiff = it.next()
             if (raumschiff != spielStand.eos && spielStand.eos.koordinaten == raumschiff.koordinaten) {
                 println("Hier ist das Raumschiff ${raumschiff.name} gesteuert von ${raumschiff.kapitaen?.name ?: "niemanden"}")
-                print("Möchtest du dieses Raumschiff angreifen? (y/n) ")
+                print("Moechtest du dieses Raumschiff angreifen? (y/n) ")
                 if (charLesen(scanner) == 'y') {
                     spielStand.eos.angreifen(raumschiff)
 
                     if (raumschiff.integritaet == 0) {
-                        println("${raumschiff.name} wurde zerstört")
+                        println("${raumschiff.name} wurde zerstoert")
                         it.remove()
                     }
                 }
@@ -110,7 +110,7 @@ fun main() {
         for (planet in spielStand.planeten) {
             if (spielStand.eos.koordinaten == planet.koordinaten) {
                 println("Hier ist der Planet ${planet.name}. Dieser Planet hat ${if (planet.atmosphaere) "eine" else "keine"} Atmosphaere.")
-                print("Möchtest du mit diesem Planeten Ladungen tauschen? (y/n) ")
+                print("Moechtest du mit diesem Planeten Ladungen tauschen? (y/n) ")
 
                 if (charLesen(scanner) == 'y') {
                     tauschen(scanner, spielStand.eos, planet)
@@ -135,7 +135,7 @@ fun main() {
         if (spielStand.eos.integritaet == 0) {
             gameOver = true
 
-            println("Dein Raumschiff ${spielStand.eos.name} wurde zerstört.")
+            println("Dein Raumschiff ${spielStand.eos.name} wurde zerstoert.")
             println("===== GAME OVER =====")
         }
     }
@@ -270,13 +270,13 @@ fun tauschen(scanner: Scanner, raumschiff: Raumschiff, planet: Planet) {
             println("Der Planet hat keine Ladungen und du kannst nur welche geben.")
             auswahl = 1
         } else {
-            auswahl = ConsoleHelper.printMenuOpt("Möchtest du Ladungen geben oder erhalten?", "Geben", "Erhalten")
+            auswahl = ConsoleHelper.printMenuOpt("Moechtest du Ladungen geben oder erhalten?", "Geben", "Erhalten")
         }
 
         when (auswahl) {
             0 -> break
             1 -> {
-                val ladung = ladungAuswaehlen("Welche Ladung möchtest du geben?", raumschiff.ladungen)
+                val ladung = ladungAuswaehlen("Welche Ladung moechtest du geben?", raumschiff.ladungen)
                 if (ladung != null) {
                     raumschiff.removeLadung(ladung)
                     planet.addLadung(ladung)
@@ -286,7 +286,7 @@ fun tauschen(scanner: Scanner, raumschiff: Raumschiff, planet: Planet) {
             }
 
             2 -> {
-                val ladung = ladungAuswaehlen("Welche Ladung möchtest du erhalten?", planet.ladungen)
+                val ladung = ladungAuswaehlen("Welche Ladung moechtest du erhalten?", planet.ladungen)
                 if (ladung != null) {
                     planet.removeLadung(ladung)
                     raumschiff.addLadung(ladung)
@@ -299,7 +299,7 @@ fun tauschen(scanner: Scanner, raumschiff: Raumschiff, planet: Planet) {
         }
 
         if (wiederholen) {
-            print("Möchtest du noch mehr tauschen? (y/n) ")
+            print("Moechtest du noch mehr tauschen? (y/n) ")
             wiederholen = charLesen(scanner) == 'y'
         }
     }

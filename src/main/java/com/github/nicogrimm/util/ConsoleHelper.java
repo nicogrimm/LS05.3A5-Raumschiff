@@ -80,7 +80,7 @@ public class ConsoleHelper {
         for (Object s: txt) {
             printMenuElement(c++,s.toString());
         }
-        return inputInt("Wählen Sie", 1, txt.length);
+        return inputInt("Waehlen Sie", 1, txt.length);
     }
 
     /**
@@ -106,7 +106,7 @@ public class ConsoleHelper {
         for (Object s: txt) {
             printMenuElement(c++,s.toString());
         }
-        return inputInt("Wählen Sie", 0, txt.length);
+        return inputInt("Waehlen Sie", 0, txt.length);
     }
 
     /**
